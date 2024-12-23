@@ -1,3 +1,3 @@
-module github.com/UjjwalMahar/ConvertSh
+module github.com/EverythingSh/convertsh
 
-go 1.23.4
+go 1.22.3
