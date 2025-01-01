@@ -5,9 +5,21 @@ import (
 	"image/jpeg"
 	"image/png"
 	"os"
+
+	"github.com/EverythingSh/convertsh/internal/converter"
 )
 
-func ConvertJpegToPng(inputFile, outputFile string) error {
+type JPEGConverter struct {
+	*converter.BaseConverter
+}
+
+func NewJPEGConverter(options *converter.ConversionOptions) *JPEGConverter {
+	return &JPEGConverter{
+		BaseConverter: converter.NewBaseConverter(converter.JPEG, converter.PNG, options),
+	}
+}
+
+func (j *JPEGConverter) Convert(inputFile, outputFile string) error {
 	inFile, err := os.Open(inputFile)
 	if err != nil {
 		return fmt.Errorf("failed to open input file: %w", err)
