@@ -6,7 +6,7 @@ Convert anything you like : )
 To build the project, use the following command:
 
 ```sh
-go build -o build/con .
+go build -o build/con cmd/main.go
 ```
 
 ## Running the Project
