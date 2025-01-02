@@ -20,5 +20,5 @@ type ImageMetadata struct {
 type ConversionOptions struct {
 	Quality          int
 	CompressionLevel int
-	*ImageMetadata
+	Metadata         *ImageMetadata
 }

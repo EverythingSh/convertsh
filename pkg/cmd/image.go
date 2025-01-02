@@ -3,9 +3,12 @@ package cmd
 import (
 	"strings"
 
+	"github.com/EverythingSh/convertsh/internal/converter"
 	"github.com/EverythingSh/convertsh/pkg/images"
 	"github.com/spf13/cobra"
 )
+
+var toFormat string
 
 // imgCmd represents the img command
 var imgCmd = &cobra.Command{
@@ -24,15 +27,26 @@ var imgCmd = &cobra.Command{
 			pngImage = strings.TrimSuffix(jpegImage, ".jpg") + ".png"
 		}
 
-		jpegConverter := images.NewJPEGConverter(nil)
+		if toFormat == "" {
+			toFormat = "png"
+		}
+
+		jpegConverter := images.NewJPEGConverter(toFormat, &converter.ConversionOptions{
+			Quality:          100,
+			CompressionLevel: 0,
+			Metadata:         &converter.ImageMetadata{},
+		})
+
 		err := jpegConverter.Convert(jpegImage, pngImage)
 		if err != nil {
 			return err
 		}
+
 		return nil
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(imgCmd)
+	imgCmd.Flags().StringVarP(&toFormat, "to", "t", "", "The format to convert to")
 }

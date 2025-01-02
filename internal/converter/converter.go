@@ -1,15 +1,15 @@
 package converter
 
 type BaseConverter struct {
-	sourceFormat ImageFormat
-	targetFormat ImageFormat
-	options      *ConversionOptions
+	SourceFormat ImageFormat
+	TargetFormat ImageFormat
+	Options      *ConversionOptions
 }
 
 func NewBaseConverter(sourceFormat, targetFormat ImageFormat, options *ConversionOptions) *BaseConverter {
 	return &BaseConverter{
-		sourceFormat: sourceFormat,
-		targetFormat: targetFormat,
-		options:      options,
+		SourceFormat: sourceFormat,
+		TargetFormat: targetFormat,
+		Options:      options,
 	}
 }
