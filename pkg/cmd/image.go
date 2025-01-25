@@ -1,10 +1,9 @@
 package cmd
 
 import (
-	"strings"
+	"fmt"
 
-	"github.com/EverythingSh/convertsh/internal/converter"
-	"github.com/EverythingSh/convertsh/pkg/images"
+	"github.com/EverythingSh/convertsh/internal/converter/detect"
 	"github.com/spf13/cobra"
 )
 
@@ -19,28 +18,35 @@ var imgCmd = &cobra.Command{
 	Long:    `Convert JPEG images to PNG format using the image command.`,
 
 	RunE: func(cmd *cobra.Command, args []string) error {
-		jpegImage := args[0]
-		var pngImage string
-		if strings.HasSuffix(jpegImage, ".jpeg") {
-			pngImage = strings.TrimSuffix(jpegImage, ".jpeg") + ".png"
-		} else {
-			pngImage = strings.TrimSuffix(jpegImage, ".jpg") + ".png"
+		format := detect.ImageType(args[0])
+
+		if format == "" {
+			return fmt.Errorf("could not detect image type")
 		}
 
-		if toFormat == "" {
-			toFormat = "png"
-		}
+		fmt.Println("TYPE:", format)
+		// jpegImage := args[0]
+		// var pngImage string
+		// if strings.HasSuffix(jpegImage, ".jpeg") {
+		// 	pngImage = strings.TrimSuffix(jpegImage, ".jpeg") + ".png"
+		// } else {
+		// 	pngImage = strings.TrimSuffix(jpegImage, ".jpg") + ".png"
+		// }
 
-		jpegConverter := images.NewJPEGConverter(toFormat, &converter.ConversionOptions{
-			Quality:          100,
-			CompressionLevel: 0,
-			Metadata:         &converter.ImageMetadata{},
-		})
+		// if toFormat == "" {
+		// 	toFormat = "png"
+		// }
 
-		err := jpegConverter.Convert(jpegImage, pngImage)
-		if err != nil {
-			return err
-		}
+		// jpegConverter := images.NewJPEGConverter(toFormat, &converter.ConversionOptions{
+		// 	Quality:          100,
+		// 	CompressionLevel: 0,
+		// 	Metadata:         &converter.ImageMetadata{},
+		// })
+
+		// err := jpegConverter.Convert(jpegImage, pngImage)
+		// if err != nil {
+		// 	return err
+		// }
 
 		return nil
 	},

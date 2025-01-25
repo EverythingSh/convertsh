@@ -1,62 +1,53 @@
 package images
 
-import (
-	"fmt"
-	"image"
-	"image/jpeg"
-	"os"
+// type JPEGConverter struct {
+// 	con *converter.BaseConverter
+// }
 
-	"github.com/EverythingSh/convertsh/internal/converter"
-)
+// func NewJPEGConverter(toFormat string, options *converter.ConversionOptions) *JPEGConverter {
+// 	return &JPEGConverter{
+// 		con: converter.NewBaseConverter(converter.JPEG, converter.ImageFormat(toFormat), options),
+// 	}
+// }
 
-type JPEGConverter struct {
-	con *converter.BaseConverter
-}
+// func (j *JPEGConverter) Convert(inputFile, outputFile string) error {
+// 	inFile, err := os.Open(inputFile)
+// 	if err != nil {
+// 		return fmt.Errorf("failed to open input file: %w", err)
+// 	}
+// 	defer inFile.Close()
 
-func NewJPEGConverter(toFormat string, options *converter.ConversionOptions) *JPEGConverter {
-	return &JPEGConverter{
-		con: converter.NewBaseConverter(converter.JPEG, converter.ImageFormat(toFormat), options),
-	}
-}
+// 	img, err := jpeg.Decode(inFile)
+// 	if err != nil {
+// 		return fmt.Errorf("failed to decode JPEG image: %w", err)
+// 	}
 
-func (j *JPEGConverter) Convert(inputFile, outputFile string) error {
-	inFile, err := os.Open(inputFile)
-	if err != nil {
-		return fmt.Errorf("failed to open input file: %w", err)
-	}
-	defer inFile.Close()
+// 	bounds := img.Bounds()
+// 	j.con.Options.Metadata.Height = bounds.Dy()
+// 	j.con.Options.Metadata.Width = bounds.Dx()
+// 	j.con.Options.Metadata.Format = converter.JPEG
 
-	img, err := jpeg.Decode(inFile)
-	if err != nil {
-		return fmt.Errorf("failed to decode JPEG image: %w", err)
-	}
+// 	switch j.con.TargetFormat {
+// 	case converter.PNG:
+// 		err = ToPNG(img, outputFile)
+// 		if err != nil {
+// 			return fmt.Errorf("failed to convert to PNG: %w", err)
+// 		}
+// 	}
+// 	return nil
+// }
 
-	bounds := img.Bounds()
-	j.con.Options.Metadata.Height = bounds.Dy()
-	j.con.Options.Metadata.Width = bounds.Dx()
-	j.con.Options.Metadata.Format = converter.JPEG
+// func ToJPEG(img image.Image, outputFile string) error {
+// 	outFile, err := os.Create(outputFile)
+// 	if err != nil {
+// 		return fmt.Errorf("failed to create output file: %w", err)
+// 	}
+// 	defer outFile.Close()
 
-	switch j.con.TargetFormat {
-	case converter.PNG:
-		err = ToPNG(img, outputFile)
-		if err != nil {
-			return fmt.Errorf("failed to convert to PNG: %w", err)
-		}
-	}
-	return nil
-}
+// 	err = jpeg.Encode(outFile, img, nil)
+// 	if err != nil {
+// 		return fmt.Errorf("failed to encode PNG image: %w", err)
+// 	}
 
-func ToJPEG(img image.Image, outputFile string) error {
-	outFile, err := os.Create(outputFile)
-	if err != nil {
-		return fmt.Errorf("failed to create output file: %w", err)
-	}
-	defer outFile.Close()
-
-	err = jpeg.Encode(outFile, img, nil)
-	if err != nil {
-		return fmt.Errorf("failed to encode PNG image: %w", err)
-	}
-
-	return nil
-}
+// 	return nil
+// }
