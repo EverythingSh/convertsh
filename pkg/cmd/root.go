@@ -1,8 +1,11 @@
 package cmd
 
 import (
+	"fmt"
 	"os"
 
+	"github.com/EverythingSh/convertsh/pkg/tui"
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/spf13/cobra"
 )
 
@@ -11,6 +14,13 @@ var rootCmd = &cobra.Command{
 	Use:   "con",
 	Short: "Convert any file to any format",
 	Long:  `Convert any file to any format. For example:`,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		p := tea.NewProgram(tui.InitialModel())
+		if _, err := p.Run(); err != nil {
+			return fmt.Errorf("failed to run program: %w", err)
+		}
+		return nil
+	},
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	// Run: func(cmd *cobra.Command, args []string) { },
