@@ -2,6 +2,7 @@ package tui
 
 import (
 	"fmt"
+	"io/ioutil"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -13,15 +14,33 @@ type Model struct {
 }
 
 func InitialModel() Model {
+	files, err := getFilesInCurrentDir()
+	if err != nil {
+		fmt.Printf("Error %e", err)
+	}
 	return Model{
 		// Our to-do list is a grocery list
-		Choices: []string{"Buy carrots", "Buy celery", "Buy kohlrabi"},
+		Choices: files,
 
 		// A map which indicates which choices are selected. We're using
 		// the  map like a mathematical set. The keys refer to the indexes
 		// of the `choices` slice, above.
 		Selected: make(map[int]struct{}),
 	}
+}
+func getFilesInCurrentDir() ([]string, error) {
+	files := []string{}
+	entries, err := ioutil.ReadDir(".")
+	if err != nil {
+		return nil, err
+	}
+
+	for _, entry := range entries {
+		if !entry.IsDir() {
+			files = append(files, entry.Name())
+		}
+	}
+	return files, nil
 }
 
 func (m Model) Init() tea.Cmd {
