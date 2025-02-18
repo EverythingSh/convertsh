@@ -2,7 +2,7 @@ package tui
 
 import (
 	"fmt"
-	"io/ioutil"
+	"os"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -30,7 +30,7 @@ func InitialModel() Model {
 }
 func getFilesInCurrentDir() ([]string, error) {
 	files := []string{}
-	entries, err := ioutil.ReadDir(".")
+	entries, err := os.ReadDir(".")
 	if err != nil {
 		return nil, err
 	}
@@ -92,7 +92,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m Model) View() string {
 	// The header
-	s := "What should we buy at the market?\n\n"
+	s := "Files in the directory:\n\n"
 
 	// Iterate over our choices
 	for i, choice := range m.Choices {

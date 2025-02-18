@@ -1,5 +1,17 @@
 # ConvertSh
 Convert anything you like : )
+**The project is currently under development🏗️**
+
+## TO-DO
+
+- Support for bulk conversion of files.
+- Support for zip/unzip and file compression.
+- Support for almost all image, video, audio, and document types.
+- Support for a beautiful TUI for navigating directories and selecting files for conversion.
+- Support for accessing Google Drive workspace for importing files and conversion.
+- Easy installation of the tool using different package managers.
+- Cross-platform support.
+- Support of AI for enhancing audio containing background noises, enhancing images like removing background from objects, etc.
 
 ## Building the Project
 
