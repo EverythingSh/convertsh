@@ -23,6 +23,7 @@ var imgCmd = &cobra.Command{
 			return fmt.Errorf("please provide the format to convert to")
 		}
 
+		vips.LoggingSettings(nil, vips.LogLevelError)
 		vips.Startup(nil)
 		defer vips.Shutdown()
 		img, err := vips.NewImageFromFile(args[0])
