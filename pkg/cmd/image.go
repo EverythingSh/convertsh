@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	images "github.com/EverythingSh/convertsh/pkg/image"
 	"github.com/davidbyttow/govips/v2/vips"
 	"github.com/spf13/cobra"
 )
@@ -23,6 +24,11 @@ var imgCmd = &cobra.Command{
 			return fmt.Errorf("please provide the format to convert to")
 		}
 
+		toFormat = strings.ToLower(toFormat)
+		if toFormat != "png" {
+			return fmt.Errorf("unsupported format")
+		}
+
 		vips.LoggingSettings(nil, vips.LogLevelError)
 		vips.Startup(nil)
 		defer vips.Shutdown()
@@ -31,14 +37,14 @@ var imgCmd = &cobra.Command{
 			panic(err)
 		}
 
-		formatDetect := img.Format().FileExt()
-		switch strings.TrimPrefix(formatDetect, ".") {
+		switch toFormat {
 		case "jpeg":
 			fallthrough
 		case "jpg":
 			fmt.Println("jpeg detected")
 		case "png":
-			fmt.Println("png detected")
+			fmt.Println("coverting to png")
+			images.ToPNG(img)
 		case "gif":
 			fmt.Println("gif detected")
 		default:
