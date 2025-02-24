@@ -13,6 +13,16 @@ Convert anything you like : )
 - Cross-platform support.
 - Support of AI for enhancing audio containing background noises, enhancing images like removing background from objects, etc.
 
+## Installing Dependencies
+I've used go-vips(a wrapper around class for libvips). Dependencies that are needed.
+
+1) If on OSX then set:
+```
+export CGO_CFLAGS_ALLOW="-Xpreprocessor"
+```
+
+2) Install to packages namely `pkg-config` and `vips`.
+
 ## Building the Project
 
 To build the project, use the following command:

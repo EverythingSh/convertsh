@@ -2,8 +2,9 @@ package cmd
 
 import (
 	"fmt"
+	"strings"
 
-	"github.com/EverythingSh/convertsh/internal/converter/detect"
+	"github.com/davidbyttow/govips/v2/vips"
 	"github.com/spf13/cobra"
 )
 
@@ -18,35 +19,30 @@ var imgCmd = &cobra.Command{
 	Long:    `Convert JPEG images to PNG format using the image command.`,
 
 	RunE: func(cmd *cobra.Command, args []string) error {
-		format := detect.ImageType(args[0])
-
-		if format == "" {
-			return fmt.Errorf("could not detect image type")
+		if toFormat == "" {
+			return fmt.Errorf("please provide the format to convert to")
 		}
 
-		fmt.Println("TYPE:", format)
-		// jpegImage := args[0]
-		// var pngImage string
-		// if strings.HasSuffix(jpegImage, ".jpeg") {
-		// 	pngImage = strings.TrimSuffix(jpegImage, ".jpeg") + ".png"
-		// } else {
-		// 	pngImage = strings.TrimSuffix(jpegImage, ".jpg") + ".png"
-		// }
+		vips.Startup(nil)
+		defer vips.Shutdown()
+		img, err := vips.NewImageFromFile(args[0])
+		if err != nil {
+			panic(err)
+		}
 
-		// if toFormat == "" {
-		// 	toFormat = "png"
-		// }
-
-		// jpegConverter := images.NewJPEGConverter(toFormat, &converter.ConversionOptions{
-		// 	Quality:          100,
-		// 	CompressionLevel: 0,
-		// 	Metadata:         &converter.ImageMetadata{},
-		// })
-
-		// err := jpegConverter.Convert(jpegImage, pngImage)
-		// if err != nil {
-		// 	return err
-		// }
+		formatDetect := img.Format().FileExt()
+		switch strings.TrimPrefix(formatDetect, ".") {
+		case "jpeg":
+			fallthrough
+		case "jpg":
+			fmt.Println("jpeg detected")
+		case "png":
+			fmt.Println("png detected")
+		case "gif":
+			fmt.Println("gif detected")
+		default:
+			fmt.Println("Unsupported format")
+		}
 
 		return nil
 	},
