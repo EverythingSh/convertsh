@@ -25,7 +25,7 @@ var imgCmd = &cobra.Command{
 		}
 
 		toFormat = strings.ToLower(toFormat)
-		if toFormat != "png" {
+		if toFormat != "png" && toFormat != "jpeg" && toFormat != "jpg" {
 			return fmt.Errorf("unsupported format")
 		}
 
@@ -41,7 +41,8 @@ var imgCmd = &cobra.Command{
 		case "jpeg":
 			fallthrough
 		case "jpg":
-			fmt.Println("jpeg detected")
+			fmt.Println("converting to jpeg")
+			images.ToJPEG(img)
 		case "png":
 			fmt.Println("coverting to png")
 			images.ToPNG(img)
