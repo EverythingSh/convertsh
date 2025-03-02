@@ -3,119 +3,275 @@ package tui
 import (
 	"fmt"
 	"os"
+	"path/filepath"
+	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 )
 
-type Model struct {
-	Choices  []string         // items on the to-do list
-	Cursor   int              // which to-do list item our cursor is pointing at
-	Selected map[int]struct{} // which to-do items are selected
+// File represents a file or directory in the file system
+type File struct {
+	Name     string
+	Path     string
+	IsDir    bool
+	Selected bool
 }
+
+// Model represents the application state
+type Model struct {
+	Files      []File
+	Cursor     int
+	CurrentDir string
+	Width      int
+	Height     int
+	Message    string
+}
+
+// Styles
+// Styles
+var (
+	titleStyle = lipgloss.NewStyle().
+			Foreground(lipgloss.Color("#7aa2f7")).
+			Bold(true).
+			MarginBottom(1)
+
+	selectedStyle = lipgloss.NewStyle().
+			Foreground(lipgloss.Color("#9ece6a")).
+			Bold(true)
+
+	directoryStyle = lipgloss.NewStyle().
+			Foreground(lipgloss.Color("#e0af68"))
+
+	fileStyle = lipgloss.NewStyle().
+			Foreground(lipgloss.Color("#c0caf5"))
+
+	cursorStyle = lipgloss.NewStyle().
+			Foreground(lipgloss.Color("#bb9af7"))
+
+	statusStyle = lipgloss.NewStyle().
+			Foreground(lipgloss.Color("#7aa2f7")).
+			MarginTop(1).
+			MarginBottom(1)
+
+	helpStyle = lipgloss.NewStyle().
+			Foreground(lipgloss.Color("#565f89")).
+			Align(lipgloss.Left)
+)
 
 func InitialModel() Model {
-	files, err := getFilesInCurrentDir()
+	currentDir, err := os.Getwd()
 	if err != nil {
-		fmt.Printf("Error %e", err)
+		fmt.Printf("Error getting current directory: %v\n", err)
+		return Model{}
 	}
-	return Model{
-		// Our to-do list is a grocery list
-		Choices: files,
 
-		// A map which indicates which choices are selected. We're using
-		// the  map like a mathematical set. The keys refer to the indexes
-		// of the `choices` slice, above.
-		Selected: make(map[int]struct{}),
+	files, err := getFilesInDir(currentDir)
+	if err != nil {
+		return Model{Message: fmt.Sprintf("Error: %v", err)}
+	}
+
+	return Model{
+		Files:      files,
+		Cursor:     0,
+		CurrentDir: currentDir,
+		Width:      50,
+		Height:     20,
 	}
 }
-func getFilesInCurrentDir() ([]string, error) {
-	files := []string{}
-	entries, err := os.ReadDir(".")
+
+func getFilesInDir(dir string) ([]File, error) {
+	entries, err := os.ReadDir(dir)
 	if err != nil {
 		return nil, err
 	}
 
+	var files []File
+	// Add parent directory entry
+	if dir != "/" {
+		files = append(files, File{
+			Name:  "..",
+			Path:  filepath.Dir(dir),
+			IsDir: true,
+		})
+	}
+
 	for _, entry := range entries {
-		if !entry.IsDir() {
-			files = append(files, entry.Name())
+		// Skip hidden files
+		if strings.HasPrefix(entry.Name(), ".") && entry.Name() != ".." {
+			continue
 		}
+
+		files = append(files, File{
+			Name:  entry.Name(),
+			Path:  filepath.Join(dir, entry.Name()),
+			IsDir: entry.IsDir(),
+		})
 	}
 	return files, nil
 }
 
 func (m Model) Init() tea.Cmd {
-	// Just return `nil`, which means "no I/O right now, please."
 	return nil
 }
 
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
+	case tea.WindowSizeMsg:
+		m.Width = msg.Width
+		m.Height = msg.Height
 
-	// Is it a key press?
 	case tea.KeyMsg:
-
-		// Cool, what was the actual key pressed?
 		switch msg.String() {
-
-		// These keys should exit the program.
 		case "ctrl+c", "q":
 			return m, tea.Quit
 
-		// The "up" and "k" keys move the cursor up
 		case "up", "k":
 			if m.Cursor > 0 {
 				m.Cursor--
 			}
 
-		// The "down" and "j" keys move the cursor down
 		case "down", "j":
-			if m.Cursor < len(m.Choices)-1 {
+			if m.Cursor < len(m.Files)-1 {
 				m.Cursor++
 			}
 
-		// The "enter" key and the spacebar (a literal space) toggle
-		// the selected state for the item that the cursor is pointing at.
-		case "enter", " ":
-			_, ok := m.Selected[m.Cursor]
-			if ok {
-				delete(m.Selected, m.Cursor)
+		case "home":
+			m.Cursor = 0
+
+		case "end":
+			m.Cursor = len(m.Files) - 1
+
+		case "enter":
+			selectedFile := m.Files[m.Cursor]
+			if selectedFile.IsDir {
+				// Navigate into the directory
+				newDir := selectedFile.Path
+				files, err := getFilesInDir(newDir)
+				if err != nil {
+					m.Message = fmt.Sprintf("Error: %v", err)
+					return m, nil
+				}
+				m.Files = files
+				m.CurrentDir = newDir
+				m.Cursor = 0
+				m.Message = ""
 			} else {
-				m.Selected[m.Cursor] = struct{}{}
+				// Select file
+				m.Files[m.Cursor].Selected = !m.Files[m.Cursor].Selected
+			}
+
+		case " ":
+			if !m.Files[m.Cursor].IsDir {
+				m.Files[m.Cursor].Selected = !m.Files[m.Cursor].Selected
+			}
+
+		case "backspace", "h", "left":
+			// Go up one directory
+			if m.CurrentDir != "/" {
+				parentDir := filepath.Dir(m.CurrentDir)
+				files, err := getFilesInDir(parentDir)
+				if err != nil {
+					m.Message = fmt.Sprintf("Error: %v", err)
+					return m, nil
+				}
+				m.Files = files
+				m.CurrentDir = parentDir
+				m.Cursor = 0
+				m.Message = ""
 			}
 		}
 	}
 
-	// Return the updated model to the Bubble Tea runtime for processing.
-	// Note that we're not returning a command.
 	return m, nil
 }
 
 func (m Model) View() string {
-	// The header
-	s := "Files in the directory:\n\n"
-
-	// Iterate over our choices
-	for i, choice := range m.Choices {
-
-		// Is the cursor pointing at this choice?
-		cursor := " " // no cursor
-		if m.Cursor == i {
-			cursor = ">" // cursor!
-		}
-
-		// Is this choice selected?
-		checked := " " // not selected
-		if _, ok := m.Selected[i]; ok {
-			checked = "x" // selected!
-		}
-
-		// Render the row
-		s += fmt.Sprintf("%s [%s] %s\n", cursor, checked, choice)
+	if len(m.Files) == 0 {
+		return titleStyle.Render("Empty directory") + "\n" +
+			helpStyle.Render("\nPress 'backspace' to go up, 'q' to quit")
 	}
 
-	// The footer
-	s += "\nPress q to quit.\n"
+	// Title bar - simple and clean
+	s := titleStyle.Render("File Browser")
 
-	// Send the UI for rendering
+	// Current directory - clean with minimal decoration
+	s += fmt.Sprintf("\n%s\n\n", statusStyle.Render(m.CurrentDir))
+
+	// Visible height calculation
+	visibleItems := m.Height - 8 // Reduced space for UI elements
+	if visibleItems < 1 {
+		visibleItems = 10
+	}
+
+	// Calculate pagination
+	start := 0
+	if len(m.Files) > visibleItems {
+		middle := visibleItems / 2
+		if m.Cursor > middle {
+			start = m.Cursor - middle
+		}
+		if start+visibleItems > len(m.Files) {
+			start = len(m.Files) - visibleItems
+		}
+		if start < 0 {
+			start = 0
+		}
+	}
+	end := start + visibleItems
+	if end > len(m.Files) {
+		end = len(m.Files)
+	}
+
+	// Files list with minimal styling
+	for i := start; i < end; i++ {
+		file := m.Files[i]
+		cursor := " "
+		if m.Cursor == i {
+			cursor = "•" // Simple bullet point cursor
+			cursor = cursorStyle.Render(cursor)
+		}
+
+		fileLabel := file.Name
+		if file.IsDir {
+			fileLabel = directoryStyle.Render(fileLabel + "/")
+		} else {
+			if file.Selected {
+				fileLabel = selectedStyle.Render("✓ " + fileLabel)
+			} else {
+				fileLabel = fileStyle.Render(fileLabel)
+			}
+		}
+
+		s += fmt.Sprintf(" %s %s\n", cursor, fileLabel)
+	}
+
+	// Simple pagination indicator
+	if len(m.Files) > visibleItems {
+		s += helpStyle.Render(
+			fmt.Sprintf("\n%d-%d of %d", start+1, end, len(m.Files)))
+	}
+
+	// Error message - simple inline notification
+	if m.Message != "" {
+		s += "\n" + lipgloss.NewStyle().
+			Foreground(lipgloss.Color("#f7768e")).
+			Render("Error: "+m.Message)
+	}
+
+	// Help text - simplified and minimal
+	s += "\n\n" + helpStyle.Render("↑/↓: navigate • space: select • enter: open • backspace: back • q: quit")
+
 	return s
+}
+
+// GetSelectedFiles returns all selected files
+func (m Model) GetSelectedFiles() []File {
+	var selected []File
+	for _, file := range m.Files {
+		if file.Selected {
+			selected = append(selected, file)
+		}
+	}
+	return selected
 }

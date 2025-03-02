@@ -15,9 +15,16 @@ var rootCmd = &cobra.Command{
 	Short: "Convert any file to any format",
 	Long:  `Convert any file to any format. For example:`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		p := tea.NewProgram(tui.InitialModel())
+		model := tui.InitialModel()
+		p := tea.NewProgram(model, tea.WithAltScreen())
 		if _, err := p.Run(); err != nil {
 			return fmt.Errorf("failed to run program: %w", err)
+		}
+
+		files := model.GetSelectedFiles()
+
+		for _, file := range files {
+			fmt.Println(file.Path)
 		}
 		return nil
 	},
