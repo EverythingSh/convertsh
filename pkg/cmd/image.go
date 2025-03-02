@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	images "github.com/EverythingSh/convertsh/pkg/image"
+	"github.com/EverythingSh/convertsh/pkg/types"
 	"github.com/davidbyttow/govips/v2/vips"
 	"github.com/spf13/cobra"
 )
@@ -25,7 +26,16 @@ var imgCmd = &cobra.Command{
 		}
 
 		toFormat = strings.ToLower(toFormat)
-		if toFormat != "png" && toFormat != "jpeg" && toFormat != "jpg" {
+
+		var isConvertible bool
+		for _, format := range types.RasterFormats {
+			if toFormat == string(format) {
+				isConvertible = true
+				break
+			}
+		}
+
+		if !isConvertible {
 			return fmt.Errorf("unsupported format")
 		}
 
@@ -35,6 +45,11 @@ var imgCmd = &cobra.Command{
 		img, err := vips.NewImageFromFile(args[0])
 		if err != nil {
 			panic(err)
+		}
+
+		if img.Format().FileExt()[1:] == toFormat {
+			fmt.Println("already in the desired format")
+			return nil
 		}
 
 		switch toFormat {
@@ -47,9 +62,10 @@ var imgCmd = &cobra.Command{
 			fmt.Println("coverting to png")
 			images.ToPNG(img)
 		case "gif":
-			fmt.Println("gif detected")
+			fmt.Println("converting to gif")
+			images.ToGIF(img)
 		default:
-			fmt.Println("Unsupported format")
+			fmt.Println("unsupported format")
 		}
 
 		return nil
