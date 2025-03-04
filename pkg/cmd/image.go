@@ -17,8 +17,8 @@ var imgCmd = &cobra.Command{
 	Use:     "image",
 	Aliases: []string{"img"},
 	Args:    cobra.ExactArgs(1),
-	Short:   "Convert JPEG images to PNG format",
-	Long:    `Convert JPEG images to PNG format using the image command.`,
+	Short:   "Convert any images to a different format",
+	Long:    `This command can convert any images to a different format`,
 
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if toFormat == "" {
@@ -64,6 +64,21 @@ var imgCmd = &cobra.Command{
 		case "gif":
 			fmt.Println("converting to gif")
 			images.ToGIF(img)
+		case "tiff":
+			fmt.Println("converting to tiff")
+			images.ToTIFF(img)
+		case "bmp":
+			fmt.Println("converting to bmp")
+			images.ToBMP(args[0])
+		case "webp":
+			fmt.Println("converting to webp")
+			images.ToWEBP(img)
+		case "heif":
+			fmt.Println("converting to heif")
+			images.ToHEIF(img)
+		case "heic":
+			fmt.Println("converting to heic")
+			// images.ToHEIC(img)
 		default:
 			fmt.Println("unsupported format")
 		}

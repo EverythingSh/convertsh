@@ -9,7 +9,6 @@ const (
 	JPG  ImageRasterFormat = "jpg"
 	GIF  ImageRasterFormat = "gif"
 	TIFF ImageRasterFormat = "tiff"
-	TIF  ImageRasterFormat = "tif"
 	BMP  ImageRasterFormat = "bmp"
 	SVG  ImageVectorFormat = "svg"
 	AI   ImageVectorFormat = "ai"
@@ -23,7 +22,7 @@ const (
 )
 
 var RasterFormats = []ImageRasterFormat{
-	JPEG, PNG, JPG, GIF, TIFF, TIF, BMP, WEBP, HEIF, HEIC, AVIF, RAW, APNG,
+	JPEG, PNG, JPG, GIF, TIFF, BMP, WEBP, HEIF, HEIC, AVIF, RAW, APNG,
 }
 
 var VectorFormats = []ImageVectorFormat{
