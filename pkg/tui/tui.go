@@ -20,15 +20,15 @@ type File struct {
 
 // Model represents the application state
 type Model struct {
-	Files      []File
-	Cursor     int
-	CurrentDir string
-	Width      int
-	Height     int
-	Message    string
+	Files         []File
+	Cursor        int
+	CurrentDir    string
+	Width         int
+	Height        int
+	Message       string
+	SelectedFiles map[string]File
 }
 
-// Styles
 // Styles
 var (
 	titleStyle = lipgloss.NewStyle().
@@ -72,11 +72,12 @@ func InitialModel() Model {
 	}
 
 	return Model{
-		Files:      files,
-		Cursor:     0,
-		CurrentDir: currentDir,
-		Width:      50,
-		Height:     20,
+		Files:         files,
+		Cursor:        0,
+		CurrentDir:    currentDir,
+		Width:         50,
+		Height:        20,
+		SelectedFiles: make(map[string]File),
 	}
 }
 
@@ -154,11 +155,15 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 				m.Files = files
 				m.CurrentDir = newDir
-				m.Cursor = 0
+				m.Cursor = 1
 				m.Message = ""
 			} else {
-				// Select file
 				m.Files[m.Cursor].Selected = !m.Files[m.Cursor].Selected
+				if m.Files[m.Cursor].Selected {
+					m.SelectedFiles[selectedFile.Path] = selectedFile
+				} else {
+					delete(m.SelectedFiles, selectedFile.Path)
+				}
 			}
 
 		case " ":
@@ -267,11 +272,9 @@ func (m Model) View() string {
 
 // GetSelectedFiles returns all selected files
 func (m Model) GetSelectedFiles() []File {
-	var selected []File
-	for _, file := range m.Files {
-		if file.Selected {
-			selected = append(selected, file)
-		}
+	var selectedFiles []File
+	for _, file := range m.SelectedFiles {
+		selectedFiles = append(selectedFiles, file)
 	}
-	return selected
+	return selectedFiles
 }
