@@ -42,12 +42,13 @@ var imgCmd = &cobra.Command{
 		vips.LoggingSettings(nil, vips.LogLevelError)
 		vips.Startup(nil)
 		defer vips.Shutdown()
+		fmt.Printf("converting %s to %s\n", args[0], toFormat)
 		img, err := vips.NewImageFromFile(args[0])
 		if err != nil {
 			panic(err)
 		}
 
-		if img.Format().FileExt()[1:] == toFormat {
+		if img.Format().FileExt()[1:] == toFormat && !(strings.HasSuffix(args[0], "dng") && toFormat == "tiff") {
 			fmt.Println("already in the desired format")
 			return nil
 		}
@@ -69,7 +70,7 @@ var imgCmd = &cobra.Command{
 			images.ToTIFF(img)
 		case "bmp":
 			fmt.Println("converting to bmp")
-			images.ToBMP(args[0])
+			images.ToBMP(img, args[0])
 		case "webp":
 			fmt.Println("converting to webp")
 			images.ToWEBP(img)

@@ -2,24 +2,17 @@ package images
 
 import (
 	"fmt"
-	"image"
 	"os"
 	"path/filepath"
 
+	"github.com/davidbyttow/govips/v2/vips"
 	"golang.org/x/image/bmp"
 )
 
-func ToBMP(inputPath string) {
-	inputFile, err := os.Open(inputPath)
+func ToBMP(img *vips.ImageRef, inputPath string) {
+	imgImg, err := img.ToImage(&vips.ExportParams{Format: vips.ImageTypePNG, Quality: 100})
 	if err != nil {
-		panic(fmt.Errorf("failed to open input file: %w", err))
-	}
-	defer inputFile.Close()
-
-	// Decode the image
-	img, _, err := image.Decode(inputFile)
-	if err != nil {
-		panic(fmt.Errorf("failed to decode image: %w", err))
+		panic(fmt.Errorf("failed to convert to image: %w", err))
 	}
 
 	// Create output filename
@@ -35,7 +28,7 @@ func ToBMP(inputPath string) {
 	defer outputFile.Close()
 
 	// Encode as BMP
-	err = bmp.Encode(outputFile, img)
+	err = bmp.Encode(outputFile, imgImg)
 	if err != nil {
 		panic(fmt.Errorf("failed to encode as BMP: %w", err))
 	}
