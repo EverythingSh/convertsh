@@ -70,7 +70,7 @@ var imgCmd = &cobra.Command{
 			images.ToTIFF(img)
 		case "bmp":
 			fmt.Println("converting to bmp")
-			images.ToBMP(img, args[0])
+			images.ToBMP(img, args[0], "")
 		case "webp":
 			fmt.Println("converting to webp")
 			images.ToWEBP(img)

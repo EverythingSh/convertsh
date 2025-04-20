@@ -9,19 +9,20 @@ import (
 	"golang.org/x/image/bmp"
 )
 
-func ToBMP(img *vips.ImageRef, inputPath string) {
+func ToBMP(img *vips.ImageRef, inputPath, outputPath string) {
 	imgImg, err := img.ToImage(&vips.ExportParams{Format: vips.ImageTypePNG, Quality: 100})
 	if err != nil {
 		panic(fmt.Errorf("failed to convert to image: %w", err))
 	}
 
 	// Create output filename
-	baseName := filepath.Base(inputPath)
-	baseName = baseName[:len(baseName)-len(filepath.Ext(baseName))]
-	outputFilename := baseName + ".bmp"
-
+	if outputPath == "" {
+		baseName := filepath.Base(inputPath)
+		baseName = baseName[:len(baseName)-len(filepath.Ext(baseName))]
+		outputPath = baseName + ".bmp"
+	}
 	// Create output file
-	outputFile, err := os.Create(outputFilename)
+	outputFile, err := os.Create(outputPath)
 	if err != nil {
 		panic(fmt.Errorf("failed to create output file: %w", err))
 	}

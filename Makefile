@@ -3,5 +3,6 @@ con:
 
 clean:
 	rm -f build/con
+	rm -rf pkg/image/output_*
 
 .PHONY: con clean

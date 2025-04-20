@@ -10,6 +10,7 @@ func ToPNG(img *vips.ImageRef) {
 	ep := vips.NewPngExportParams()
 	ep.Compression = 0
 	ep.Quality = 100
+
 	pngBytes, _, err := img.ExportPng(ep)
 	if err != nil {
 		panic(err)
