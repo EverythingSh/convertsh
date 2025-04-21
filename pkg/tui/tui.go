@@ -53,7 +53,7 @@ type Model struct {
 	SelectedFiles  map[string]File
 	Formats        []types.ImageRasterFormat // Use types.FileFormat from pkg/types
 	FormatCursor   int
-	SelectedFormat types.ImageRasterFormat
+	SelectedFormat *types.ImageRasterFormat
 }
 
 // Styles (same as before)
@@ -146,7 +146,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				if m.Cursor < len(m.Files)-1 {
 					m.Cursor++
 				}
-			case "enter":
+			case " ", "s":
 				selectedFile := m.Files[m.Cursor]
 				if selectedFile.IsDir {
 					newDir := selectedFile.Path
@@ -167,15 +167,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 						delete(m.SelectedFiles, selectedFile.Path)
 					}
 				}
-			case " ", "s":
-				if !m.Files[m.Cursor].IsDir {
-					m.Files[m.Cursor].Selected = !m.Files[m.Cursor].Selected
-					if m.Files[m.Cursor].Selected {
-						m.SelectedFiles[m.Files[m.Cursor].Path] = m.Files[m.Cursor]
-					} else {
-						delete(m.SelectedFiles, m.Files[m.Cursor].Path)
-					}
-				}
 			case "backspace", "h", "left":
 				if m.CurrentDir != "/" {
 					parentDir := filepath.Dir(m.CurrentDir)
@@ -191,7 +182,22 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 			case "q", "ctrl+c":
 				return m, tea.Quit
-			case "tab":
+			case "enter":
+				selectedFile := m.Files[m.Cursor]
+				if selectedFile.IsDir {
+					newDir := selectedFile.Path
+					files, err := getFilesInDirFiltered(newDir, m.FileType)
+					if err != nil {
+						m.Message = fmt.Sprintf("Error: %v", err)
+						return m, nil
+					}
+					m.Files = files
+					m.CurrentDir = newDir
+					m.Cursor = 0
+					m.Message = ""
+				} else {
+					m.SelectedFiles[selectedFile.Path] = selectedFile
+				}
 				// Proceed to format selection if at least one file is selected
 				if len(m.SelectedFiles) > 0 {
 					m.Stage = StageSelectFormat
@@ -211,7 +217,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.FormatCursor++
 				}
 			case "enter":
-				m.SelectedFormat = m.Formats[m.FormatCursor]
+				m.SelectedFormat = &m.Formats[m.FormatCursor]
 				m.Stage = StageDone
 			case "q", "ctrl+c":
 				return m, tea.Quit
@@ -311,10 +317,11 @@ func (m Model) View() string {
 	case StageDone:
 		s := titleStyle.Render("Selection Complete!") + "\n\n"
 		s += "Selected files:\n"
-		for _, f := range m.GetSelectedFiles() {
+		files, targetFormat := m.GetSelectedFiles()
+		for _, f := range files {
 			s += fmt.Sprintf("  %s\n", f.Path)
 		}
-		s += fmt.Sprintf("\nTarget format: %s\n", m.SelectedFormat)
+		s += fmt.Sprintf("\nTarget format: %s\n", *targetFormat)
 		s += "\nPress enter or q to quit."
 		return s
 
@@ -371,10 +378,10 @@ func isImageFile(name string) bool {
 }
 
 // GetSelectedFiles returns all selected files
-func (m Model) GetSelectedFiles() []File {
+func (m Model) GetSelectedFiles() ([]File, *types.ImageRasterFormat) {
 	var selectedFiles []File
 	for _, file := range m.SelectedFiles {
 		selectedFiles = append(selectedFiles, file)
 	}
-	return selectedFiles
+	return selectedFiles, m.SelectedFormat
 }

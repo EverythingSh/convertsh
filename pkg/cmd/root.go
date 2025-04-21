@@ -3,9 +3,13 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"strings"
 
+	images "github.com/EverythingSh/convertsh/pkg/image"
 	"github.com/EverythingSh/convertsh/pkg/tui"
+	"github.com/EverythingSh/convertsh/pkg/types"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/davidbyttow/govips/v2/vips"
 	"github.com/spf13/cobra"
 )
 
@@ -17,15 +21,45 @@ var rootCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		model := tui.InitialModel()
 		p := tea.NewProgram(model, tea.WithAltScreen())
-		if _, err := p.Run(); err != nil {
+		finalModel, err := p.Run()
+		if err != nil {
 			return fmt.Errorf("failed to run program: %w", err)
 		}
 
-		files := model.GetSelectedFiles()
-
-		for _, file := range files {
-			fmt.Println(file.Path)
+		selectedFiles, targetFormat := finalModel.(tui.Model).GetSelectedFiles()
+		if len(selectedFiles) == 0 {
+			fmt.Println("No files selected.")
 		}
+		if targetFormat == nil {
+			fmt.Println("No format selected.")
+			return nil
+		}
+
+		fmt.Printf("Converting %d files to %s\n", len(selectedFiles), *targetFormat)
+
+		vips.LoggingSettings(nil, vips.LogLevelError)
+		vips.Startup(nil)
+		defer vips.Shutdown()
+		img, err := vips.NewImageFromFile(selectedFiles[0].Path)
+		if err != nil {
+			panic(err)
+		}
+		toFormat = fmt.Sprintf("%v", model.SelectedFormat)
+
+		if img.Format().FileExt()[1:] == toFormat && !(strings.HasSuffix(args[0], "dng") && toFormat == "tiff") {
+			fmt.Println("already in the desired format")
+			return nil
+		}
+		switch *targetFormat {
+		case types.JPEG:
+			fallthrough
+		case types.JPG:
+			fmt.Println("converting to jpeg")
+			images.ToJPEG(img)
+		default:
+			fmt.Println("unsupported format")
+		}
+
 		return nil
 	},
 	// Uncomment the following line if your bare application
