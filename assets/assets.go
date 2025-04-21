@@ -24,7 +24,7 @@ func GetAvailableImages() ([]string, error) {
 
 	var images []string
 	for _, file := range files {
-		if !file.IsDir() {
+		if !(file.IsDir() || strings.HasSuffix(file.Name(), ".go")) {
 			images = append(images, filepath.Join(assetsDir, file.Name()))
 		}
 	}

@@ -5,6 +5,7 @@ import (
 	"image"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/EverythingSh/convertsh/assets"
@@ -27,6 +28,9 @@ func TestToBMPConversion(t *testing.T) {
 	}
 
 	for _, imgPath := range testImages {
+		if strings.HasSuffix(imgPath, "bmp") {
+			continue
+		}
 		img, err := vips.NewImageFromFile(imgPath)
 		if err != nil {
 			t.Errorf("failed to load image %s: %v", imgPath, err)
@@ -38,14 +42,12 @@ func TestToBMPConversion(t *testing.T) {
 		origHeight := img.Height()
 		origSize := float64(origStat.Size()) / (1024 * 1024)
 
-		// Prepare output filename: output/basename+inputFormat.bmp
 		baseName := filepath.Base(imgPath)
 		ext := filepath.Ext(baseName)
 		baseNameNoExt := baseName[:len(baseName)-len(ext)]
 		inputFormat := img.Format().FileExt()[1:]
-		outputFilename := filepath.Join("output_bmp", baseNameNoExt+"TO"+inputFormat+".bmp")
+		outputFilename := filepath.Join("output_bmp", baseNameNoExt+"_"+inputFormat+"To"+".bmp")
 
-		// Call ToBMP with the correct output path logic
 		ToBMP(img, imgPath, outputFilename)
 
 		outStat, err := os.Stat(outputFilename)
@@ -72,12 +74,13 @@ func TestToBMPConversion(t *testing.T) {
 		outputSize := float64(outStat.Size()) / (1024 * 1024)
 
 		fmt.Printf(
-			"Converted %s → %s | Resolution: %dx%d → %dx%d | Size: %.3f mb → %.3f mb\n",
+			"Converted %s → %s \n Resolution: %dx%d → %dx%d \n Size: %.3f mb → %.3f mb\n",
 			imgPath, outputFilename,
 			origWidth, origHeight, bmpImg.Width, bmpImg.Height,
 			origSize, outputSize,
 		)
 
+		fmt.Printf("\n\n")
 		img.Close()
 	}
 }

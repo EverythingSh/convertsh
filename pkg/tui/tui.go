@@ -180,6 +180,14 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.Message = fmt.Sprintf("Error: %v", err)
 					return m, nil
 				}
+				selectedFiles := m.GetSelectedFiles()
+				for _, file := range selectedFiles {
+					for i, f := range files {
+						if file.Path == f.Path {
+							files[i].Selected = true
+						}
+					}
+				}
 				m.Files = files
 				m.CurrentDir = parentDir
 				m.Cursor = 0
