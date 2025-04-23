@@ -64,7 +64,7 @@ var imgCmd = &cobra.Command{
 			images.ToPNG(img)
 		case "gif":
 			fmt.Println("converting to gif")
-			images.ToGIF(img)
+			images.ToGIF(img, args[0], "")
 		case "tiff":
 			fmt.Println("converting to tiff")
 			images.ToTIFF(img)

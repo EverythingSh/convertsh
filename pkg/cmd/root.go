@@ -40,31 +40,70 @@ var rootCmd = &cobra.Command{
 		vips.LoggingSettings(nil, vips.LogLevelError)
 		vips.Startup(nil)
 		defer vips.Shutdown()
-		img, err := vips.NewImageFromFile(selectedFiles[0].Path)
-		if err != nil {
-			panic(err)
-		}
-		toFormat = fmt.Sprintf("%v", model.SelectedFormat)
 
-		if img.Format().FileExt()[1:] == toFormat && !(strings.HasSuffix(args[0], "dng") && toFormat == "tiff") {
-			fmt.Println("already in the desired format")
+		if len(selectedFiles) > 1 {
+			for _, file := range selectedFiles {
+				if err := convert(file, targetFormat); err != nil {
+					fmt.Printf("Error converting file %s: %v\n", file.Path, err)
+				}
+			}
+			fmt.Println("Conversion completed.")
 			return nil
 		}
-		switch *targetFormat {
-		case types.JPEG:
-			fallthrough
-		case types.JPG:
-			fmt.Println("converting to jpeg")
-			images.ToJPEG(img)
-		default:
-			fmt.Println("unsupported format")
+
+		if err := convert(selectedFiles[0], targetFormat); err != nil {
+			fmt.Printf("Error converting file %s: %v\n", selectedFiles[0].Path, err)
+			return err
 		}
 
+		fmt.Println("Conversion completed.")
 		return nil
 	},
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	// Run: func(cmd *cobra.Command, args []string) { },
+}
+
+func convert(selectedFile tui.File, targetFormat *types.ImageRasterFormat) error {
+	img, err := vips.NewImageFromFile(selectedFile.Path)
+	if err != nil {
+		panic(err)
+	}
+
+	if img.Format().FileExt()[1:] == toFormat && !(strings.HasSuffix(selectedFile.Name, "dng") && toFormat == "tiff") {
+		fmt.Println("already in the desired format")
+		return nil
+	}
+	switch *targetFormat {
+	case types.JPEG:
+		fallthrough
+	case types.JPG:
+		fmt.Println("converting to jpeg")
+		images.ToJPEG(img)
+	case types.PNG:
+		fmt.Println("converting to png")
+		images.ToPNG(img)
+	case types.GIF:
+		fmt.Println("converting to gif")
+		images.ToGIF(img, selectedFile.Path, "")
+	case types.TIFF:
+		fmt.Println("converting to tiff")
+		images.ToTIFF(img)
+	case types.BMP:
+		fmt.Println("converting to bmp")
+		images.ToBMP(img, selectedFile.Path, "")
+	case types.WEBP:
+		fmt.Println("converting to webp")
+		images.ToWEBP(img)
+	case types.HEIF:
+		fmt.Println("converting to heif")
+		images.ToHEIF(img)
+
+	default:
+		fmt.Println("unsupported format")
+	}
+
+	return nil
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
