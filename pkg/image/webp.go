@@ -2,12 +2,12 @@ package images
 
 import (
 	"os"
-	"path/filepath"
 
+	"github.com/EverythingSh/convertsh/pkg/util"
 	"github.com/davidbyttow/govips/v2/vips"
 )
 
-func ToWEBP(img *vips.ImageRef, inputPath, outputPath string) {
+func ToWEBP(img *vips.ImageRef, inputPath, outputPath string, isBulk bool) {
 	ep := vips.NewWebpExportParams()
 	webpBytes, _, err := img.ExportWebp(ep)
 	if err != nil {
@@ -15,9 +15,7 @@ func ToWEBP(img *vips.ImageRef, inputPath, outputPath string) {
 	}
 
 	if outputPath == "" {
-		baseName := filepath.Base(inputPath)
-		baseName = baseName[:len(baseName)-len(filepath.Ext(baseName))]
-		outputPath = baseName + ".webp"
+		outputPath = util.CreateOutputPath(inputPath, ".webp", isBulk)
 	}
 
 	err = os.WriteFile(outputPath, webpBytes, 0644)

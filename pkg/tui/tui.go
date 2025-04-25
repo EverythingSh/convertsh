@@ -370,7 +370,7 @@ func getFilesInDirFiltered(dir string, fileType FileType) ([]File, error) {
 func isImageFile(name string) bool {
 	ext := strings.ToLower(filepath.Ext(name))
 	switch ext {
-	case ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".webp":
+	case ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".webp", ".heif", ".dng", ".svg":
 		return true
 	default:
 		return false

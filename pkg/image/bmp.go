@@ -3,13 +3,13 @@ package images
 import (
 	"fmt"
 	"os"
-	"path/filepath"
 
+	"github.com/EverythingSh/convertsh/pkg/util"
 	"github.com/davidbyttow/govips/v2/vips"
 	"golang.org/x/image/bmp"
 )
 
-func ToBMP(img *vips.ImageRef, inputPath, outputPath string) {
+func ToBMP(img *vips.ImageRef, inputPath, outputPath string, isBulk bool) {
 	imgImg, err := img.ToImage(&vips.ExportParams{Format: vips.ImageTypePNG, Quality: 100})
 	if err != nil {
 		panic(fmt.Errorf("failed to convert to image: %w", err))
@@ -17,9 +17,7 @@ func ToBMP(img *vips.ImageRef, inputPath, outputPath string) {
 
 	// Create output filename
 	if outputPath == "" {
-		baseName := filepath.Base(inputPath)
-		baseName = baseName[:len(baseName)-len(filepath.Ext(baseName))]
-		outputPath = baseName + ".bmp"
+		outputPath = util.CreateOutputPath(inputPath, ".bmp", isBulk)
 	}
 	// Create output file
 	outputFile, err := os.Create(outputPath)

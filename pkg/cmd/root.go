@@ -43,7 +43,7 @@ var rootCmd = &cobra.Command{
 
 		if len(selectedFiles) > 1 {
 			for _, file := range selectedFiles {
-				if err := convert(file, targetFormat); err != nil {
+				if err := convert(file, targetFormat, true); err != nil {
 					fmt.Printf("Error converting file %s: %v\n", file.Path, err)
 				}
 			}
@@ -51,7 +51,7 @@ var rootCmd = &cobra.Command{
 			return nil
 		}
 
-		if err := convert(selectedFiles[0], targetFormat); err != nil {
+		if err := convert(selectedFiles[0], targetFormat, false); err != nil {
 			fmt.Printf("Error converting file %s: %v\n", selectedFiles[0].Path, err)
 			return err
 		}
@@ -64,7 +64,7 @@ var rootCmd = &cobra.Command{
 	// Run: func(cmd *cobra.Command, args []string) { },
 }
 
-func convert(selectedFile tui.File, targetFormat *types.ImageRasterFormat) error {
+func convert(selectedFile tui.File, targetFormat *types.ImageRasterFormat, isBulk bool) error {
 	img, err := vips.NewImageFromFile(selectedFile.Path)
 	if err != nil {
 		panic(err)
@@ -79,25 +79,25 @@ func convert(selectedFile tui.File, targetFormat *types.ImageRasterFormat) error
 		fallthrough
 	case types.JPG:
 		fmt.Println("converting to jpeg")
-		images.ToJPEG(img, selectedFile.Path, "")
+		images.ToJPEG(img, selectedFile.Path, "", isBulk)
 	case types.PNG:
 		fmt.Println("converting to png")
-		images.ToPNG(img, selectedFile.Path, "")
+		images.ToPNG(img, selectedFile.Path, "", isBulk)
 	case types.GIF:
 		fmt.Println("converting to gif")
-		images.ToGIF(img, selectedFile.Path, "")
+		images.ToGIF(img, selectedFile.Path, "", isBulk)
 	case types.TIFF:
 		fmt.Println("converting to tiff")
-		images.ToTIFF(img, selectedFile.Path, "")
+		images.ToTIFF(img, selectedFile.Path, "", isBulk)
 	case types.BMP:
 		fmt.Println("converting to bmp")
-		images.ToBMP(img, selectedFile.Path, "")
+		images.ToBMP(img, selectedFile.Path, "", isBulk)
 	case types.WEBP:
 		fmt.Println("converting to webp")
-		images.ToWEBP(img, selectedFile.Path, "")
+		images.ToWEBP(img, selectedFile.Path, "", isBulk)
 	case types.HEIF:
 		fmt.Println("converting to heif")
-		images.ToHEIF(img, selectedFile.Path, "")
+		images.ToHEIF(img, selectedFile.Path, "", isBulk)
 
 	default:
 		fmt.Println("unsupported format")

@@ -3,12 +3,12 @@ package images
 import (
 	"fmt"
 	"os"
-	"path/filepath"
 
+	"github.com/EverythingSh/convertsh/pkg/util"
 	"github.com/davidbyttow/govips/v2/vips"
 )
 
-func ToGIF(img *vips.ImageRef, inputPath, outputPath string) {
+func ToGIF(img *vips.ImageRef, inputPath, outputPath string, isBulk bool) {
 	ep := vips.NewGifExportParams()
 	gifBytes, _, err := img.ExportGIF(ep)
 	if err != nil {
@@ -18,9 +18,7 @@ func ToGIF(img *vips.ImageRef, inputPath, outputPath string) {
 
 	// Create output filename
 	if outputPath == "" {
-		baseName := filepath.Base(inputPath)
-		baseName = baseName[:len(baseName)-len(filepath.Ext(baseName))]
-		outputPath = baseName + ".gif"
+		outputPath = util.CreateOutputPath(inputPath, ".gif", isBulk)
 	}
 
 	err = os.WriteFile(outputPath, gifBytes, 0644)

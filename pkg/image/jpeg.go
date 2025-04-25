@@ -2,21 +2,19 @@ package images
 
 import (
 	"os"
-	"path/filepath"
 
+	"github.com/EverythingSh/convertsh/pkg/util"
 	"github.com/davidbyttow/govips/v2/vips"
 )
 
-func ToJPEG(img *vips.ImageRef, inputPath, outputPath string) {
+func ToJPEG(img *vips.ImageRef, inputPath, outputPath string, isBulk bool) {
 	ep := vips.NewJpegExportParams()
 	jpegBytes, _, err := img.ExportJpeg(ep)
 	if err != nil {
 		panic(err)
 	}
 	if outputPath == "" {
-		baseName := filepath.Base(inputPath)
-		baseName = baseName[:len(baseName)-len(filepath.Ext(baseName))]
-		outputPath = baseName + ".jpeg"
+		outputPath = util.CreateOutputPath(inputPath, ".jpeg", isBulk)
 	}
 
 	err = os.WriteFile(outputPath, jpegBytes, 0644)
