@@ -20,7 +20,7 @@ func ToGIF(img *vips.ImageRef, inputPath, outputPath string) {
 	if outputPath == "" {
 		baseName := filepath.Base(inputPath)
 		baseName = baseName[:len(baseName)-len(filepath.Ext(baseName))]
-		outputPath = baseName + ".bmp"
+		outputPath = baseName + ".gif"
 	}
 
 	err = os.WriteFile(outputPath, gifBytes, 0644)

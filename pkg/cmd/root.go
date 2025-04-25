@@ -79,25 +79,25 @@ func convert(selectedFile tui.File, targetFormat *types.ImageRasterFormat) error
 		fallthrough
 	case types.JPG:
 		fmt.Println("converting to jpeg")
-		images.ToJPEG(img)
+		images.ToJPEG(img, selectedFile.Path, "")
 	case types.PNG:
 		fmt.Println("converting to png")
-		images.ToPNG(img)
+		images.ToPNG(img, selectedFile.Path, "")
 	case types.GIF:
 		fmt.Println("converting to gif")
 		images.ToGIF(img, selectedFile.Path, "")
 	case types.TIFF:
 		fmt.Println("converting to tiff")
-		images.ToTIFF(img)
+		images.ToTIFF(img, selectedFile.Path, "")
 	case types.BMP:
 		fmt.Println("converting to bmp")
 		images.ToBMP(img, selectedFile.Path, "")
 	case types.WEBP:
 		fmt.Println("converting to webp")
-		images.ToWEBP(img)
+		images.ToWEBP(img, selectedFile.Path, "")
 	case types.HEIF:
 		fmt.Println("converting to heif")
-		images.ToHEIF(img)
+		images.ToHEIF(img, selectedFile.Path, "")
 
 	default:
 		fmt.Println("unsupported format")

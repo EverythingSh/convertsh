@@ -58,25 +58,25 @@ var imgCmd = &cobra.Command{
 			fallthrough
 		case "jpg":
 			fmt.Println("converting to jpeg")
-			images.ToJPEG(img)
+			images.ToJPEG(img, args[0], "")
 		case "png":
 			fmt.Println("coverting to png")
-			images.ToPNG(img)
+			images.ToPNG(img, args[0], "")
 		case "gif":
 			fmt.Println("converting to gif")
 			images.ToGIF(img, args[0], "")
 		case "tiff":
 			fmt.Println("converting to tiff")
-			images.ToTIFF(img)
+			images.ToTIFF(img, args[0], "")
 		case "bmp":
 			fmt.Println("converting to bmp")
 			images.ToBMP(img, args[0], "")
 		case "webp":
 			fmt.Println("converting to webp")
-			images.ToWEBP(img)
+			images.ToWEBP(img, args[0], "")
 		case "heif":
 			fmt.Println("converting to heif")
-			images.ToHEIF(img)
+			images.ToHEIF(img, args[0], "")
 		case "heic":
 			fmt.Println("converting to heic")
 			// images.ToHEIC(img)

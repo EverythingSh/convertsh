@@ -2,11 +2,12 @@ package images
 
 import (
 	"os"
+	"path/filepath"
 
 	"github.com/davidbyttow/govips/v2/vips"
 )
 
-func ToPNG(img *vips.ImageRef) {
+func ToPNG(img *vips.ImageRef, inputPath, outputPath string) {
 	ep := vips.NewPngExportParams()
 	ep.Compression = 0
 	ep.Quality = 100
@@ -15,7 +16,13 @@ func ToPNG(img *vips.ImageRef) {
 	if err != nil {
 		panic(err)
 	}
-	err = os.WriteFile("output_con.png", pngBytes, 0644)
+	if outputPath == "" {
+		baseName := filepath.Base(inputPath)
+		baseName = baseName[:len(baseName)-len(filepath.Ext(baseName))]
+		outputPath = baseName + ".png"
+	}
+
+	err = os.WriteFile(outputPath, pngBytes, 0644)
 	if err != nil {
 		panic(err)
 	}
